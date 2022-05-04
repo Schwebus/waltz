@@ -36,7 +36,14 @@ TangoWebapp.MainController = class extends MVC.Controller{
 
         ui_builder.set_right_item(TangoWebapp.ui.newUserLogPanel(platform_api.context));
 
-        ui_builder.set_bottom_toolbar(TangoWebapp.ui.newBottomToolbar());
+	/*ui_builder.add_mainview_item(
+                {
+                    header: "<span class='webix_icon fa-dashboard'></span> My Dashboard",
+                    borderless: true,
+                    body: newMyDashboard({id: 'my_dashboard'})
+                });*/
+
+	ui_builder.set_bottom_toolbar(TangoWebapp.ui.newBottomToolbar());
     }
     initialize(platform_api){
         $$('left_panel').attachEvent("onAfterExpand", function(id){

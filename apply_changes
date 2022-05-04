@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /home/karl/bioreactor/waltz
+ant clean
+ant assemble
+sudo rm -r /usr/local/bin/apache-tomcat-8.5.78/webapps/waltz
+sudo rm /usr/local/bin/apache-tomcat-8.5.78/webapps/waltz.war
+sudo cp /home/karl/bioreactor/waltz/build/distributions/waltz.war /usr/local/bin/apache-tomcat-8.5.78/webapps/
+sudo systemctl restart tomcat.service

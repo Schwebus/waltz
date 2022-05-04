@@ -1,3 +1,5 @@
+import "./my_dashboard.js"
+
 import "./codemirror/formatting.js"
 import "./critical_error_no_rest.js";
 import "./logger.js";
