@@ -11,6 +11,8 @@ import newMainView from "views/main_view";
 import ScriptingWidget from "widgets/scripting";
 import Manager from "widgets/tango/manager";
 
+import RecipeWidget from "./recipe_widget";
+
 export const kMainWindow = 'widget:main';
 
 export default class MainWindow extends WaltzWidget{
@@ -57,6 +59,11 @@ export default class MainWindow extends WaltzWidget{
 
         main.attachEvent('manager',()=> {
             new Manager(this.app)
+                .run()
+        })
+
+        main.attachEvent('recipe',()=> {
+            new RecipeWidget(this.app)
                 .run()
         })
 

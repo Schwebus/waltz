@@ -32,6 +32,8 @@ const toolsMenu = webix.ui({
         data: [
             {id: "toolsScripting", value: "Scripting"},
             {id: "toolsAstor", value: "Manager"},
+            {id: "toolsRecipe", value: "Recipe"},
+
             // {id: "toolsTerminal", value: "Terminal"}
         ],
         autoheight: true,
@@ -47,6 +49,9 @@ const toolsMenu = webix.ui({
                         break;
                     case "toolsTerminal":
                         PlatformApi.PlatformUIController().openTerminalTab();
+                        break;
+                    case "toolsRecipe":
+                        $$(kMainWindow).callEvent('recipe',[])
                         break;
                     default:
                         webix.message("Submenu click: " + id);

@@ -1,48 +1,53 @@
 import {WaltzWidget} from "@waltz-controls/middleware";
-import "views/scripting_console";
-import {kUserContext, UserContext} from "@waltz-controls/waltz-user-context-plugin";
+import {kUserContext} from "@waltz-controls/waltz-user-context-plugin";
 import {kChannelLog, kTopicLog} from "controllers/log";
-import UserScript from "models/user_script";
+import Recipe from "models/recipe_model";
 import {kMainWindow} from "widgets/main_window";
-import {ExecuteUserScript, kControllerUserAction} from "@waltz-controls/waltz-user-actions-plugin";
+import {ExecuteRecipe, kControllerUserAction} from "@waltz-controls/waltz-user-actions-plugin";
 
-export const kWidgetScripting = 'widget:scripting';
+import "views/recipe_view"
+
+
+export const kWidgetRecipe = 'widget:recipe';
 const kOverwrite = true;
 
-const kScriptsPanelHeader = '<span class="webix_icon mdi mdi-notebook"></span> Scripts';
+const kRecipesPanelHeader = '<span class="webix_icon mdi mdi-notebook"></span> Recipes';
 
-const kScriptsPanelListId = 'panel:scripts_list';
-export default class ScriptingWidget extends WaltzWidget {
+const kRecipesPanelListId = 'panel:recipes_list';
+
+export default class RecipeWidget extends WaltzWidget {
     constructor(app) {
-        super(kWidgetScripting, app);
+        super(kWidgetRecipe, app);
         const proxy = {
         $proxy: true,
             load: (view, params) => {
             return this.app.getContext(kUserContext)
-                .then(userContext => userContext.getOrDefault(this.name, []).map(script => new UserScript({...script})));
+                .then(userContext => userContext.getOrDefault(this.name, []).map(recipe => new Recipe(recipe)));
         },
             save: (master, params, dataProcessor) =>{
 
             let promiseContext = this.app.getContext(kUserContext);
             switch(params.operation){
                 case "insert":
-                    promiseContext = promiseContext
+                //console.log(params)
+                promiseContext = promiseContext
                         .then(userContext => userContext.updateExt(this.name, ext => ext.push(params.data)))
                     break;
-
                 case "update":
+
                     promiseContext = promiseContext
                         .then(userContext => userContext.updateExt(this.name, ext =>
                             webix.extend(
-                                ext.find(script => script.id === params.id),
+                                ext.find(recipe => recipe.id === params.id),
                                 params.data,
                                 kOverwrite)));
                     break;
-
                 case "delete":
+
+
                     promiseContext = promiseContext
                         .then(userContext => {
-                            const indexOf = userContext.get(this.name).findIndex(script => script.id === params.id)
+                            const indexOf = userContext.get(this.name).findIndex(recipe => recipe.id === params.id)
                             return userContext.updateExt(this.name, ext => ext.splice(indexOf, 1));
                         });
                     break;
@@ -50,7 +55,7 @@ export default class ScriptingWidget extends WaltzWidget {
 
             return promiseContext
                 .then(userContext => userContext.save())
-                .then(() => this.dispatch(`Successfully ${params.operation}ed UserScript[${params.id}]`,kTopicLog, kChannelLog));
+                .then(() => this.dispatch(`Successfully ${params.operation}ed Recipe[${params.id}]`,kTopicLog, kChannelLog));
         }
     };
 
@@ -58,16 +63,16 @@ export default class ScriptingWidget extends WaltzWidget {
         url: proxy,
         save: proxy
     });
-    }
+}
 
     ui(){
         return {
-            header: "<span class='webix_icon wxi-pencil'></span> Scripting",
+            header: "<span class='webix_icon wxi-pencil'></span> Recipe",
             close: true,
             body:
-                {
+                {   
                     id: this.name,
-                    view: "scripting_console",
+                    view: "recipe_view",
                     root:this
                 }
         }
@@ -76,14 +81,14 @@ export default class ScriptingWidget extends WaltzWidget {
     panel(){
         return {
             view:"accordionitem",
-            header: kScriptsPanelHeader,
-            headerAlt: kScriptsPanelHeader,
+            header: kRecipesPanelHeader,
+            headerAlt: kRecipesPanelHeader,
             headerHeight: 32,
             headerAltHeight: 32,
             collapsed: true,
-            id: kScriptsPanelListId,
+            id: kRecipesPanelListId,
             body:{
-                view: 'scripts_list',
+                view: 'recipes_list',
                 root: this
             }
         }
@@ -93,55 +98,42 @@ export default class ScriptingWidget extends WaltzWidget {
         const tab = $$(this.name) || $$(this.app.getWidget(kMainWindow).mainView.addView(this.ui()));
         tab.show();
 
-        const panel = $$(kScriptsPanelListId) || $$(this.app.getWidget(kMainWindow).leftPanel.addView(this.panel()));
+        const panel = $$(kRecipesPanelListId) || $$(this.app.getWidget(kMainWindow).leftPanel.addView(this.panel()));
         panel.expand();
     }
 
-    /**
-     * Removes side panel before closing main tab
-     *
-     */
+
     beforeCloseMain(){
-        const panel = $$(kScriptsPanelListId);
+        const panel = $$(kRecipesPanelListId);
         panel.collapse();
         this.app.getWidget(kMainWindow).leftPanel.removeView(panel);
     }
 
-    /**
-     *
-     * @param {UserScript} script
-     */
-    saveScript(script){
-        if (this.data.exists(script.id))
-            this.data.updateItem(script.id, script);
+
+    saveRecipe(recipe){
+        if (this.data.exists(recipe.id))
+            this.data.updateItem(recipe.id, recipe);
         else
-            this.data.add(script);
+            this.data.add(recipe);
 
-        this.dispatch(`Saving UserScript[${script.name}]`,kTopicLog, kChannelLog);
+        this.dispatch(`Saving Recipe[${recipe.name}]`,kTopicLog, kChannelLog);
 
-        return script;
+        return recipe;
     }
 
-    /**
-     *
-     * @param {string} id
-     */
-    removeScript(id){
+
+
+    removeRecipe(id){
         this.data.remove(id);
 
-        this.dispatch(`Removing UserScript[${id}]`,kTopicLog, kChannelLog);
+        this.dispatch(`Removing Recipe[${id}]`,kTopicLog, kChannelLog);
     }
 
-    /**
-     *
-     * @param {UserScript} script
-     * @return {Promise<*>}
-     */
-    async executeScript(script){
+    async executeRecipe(recipe){
         const user = (await this.app.getContext(kUserContext)).user;
 
         return this.app.getController(kControllerUserAction)
-                            .submit(new ExecuteUserScript({user, script}));
+                            .submit(new ExecuteRecipe({user, recipe}));
     }
 
 }
