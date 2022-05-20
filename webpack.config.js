@@ -58,7 +58,7 @@ module.exports = function(env) {
             new MiniCssExtractPlugin({
                 filename:"[name].css"
             }),
-            new webpack.DefinePlugin({
+/*            new webpack.DefinePlugin({
                 VERSION: `"${pack.version}"`,
                 APPNAME: `"${pack.name}"`,
                 PRODUCTION : production,
@@ -70,16 +70,30 @@ module.exports = function(env) {
                 TANGO_HOST : `"${env.TANGO_HOST}"`,
                 TANGO_PORT : `${env.TANGO_PORT}`,
                 USER_CONTEXT_URL : `"${env.USER_CONTEXT_URL}"`
+            }) */
+new webpack.DefinePlugin({
+                VERSION: `"${pack.version}"`,
+                APPNAME: `"${pack.name}"`,
+                PRODUCTION : production,
+                BUILD_AS_MODULE : (asmodule || standalone),
+                REST_API_PROTOCOL: `"http"`,
+                REST_API_HOST : `"localhost"`,
+                REST_API_PORT : `8080`,
+                REST_API_VERSION : `"v11"`,
+                TANGO_HOST : `"tangobox"`,
+                TANGO_PORT : `10000`,
+                USER_CONTEXT_URL : `"/user-context/cache"`
             })
+
         ],
         devServer:{
             stats:"errors-only",
             proxy: {
                 "/tango":{
-                    target: 'http://localhost:10001'
+                    target: 'http://localhost:8080'
                 },
                 "/user-context":{
-                    target: 'http://localhost:3000'
+                    target: 'http://localhost:8080'
                 }
             }
         }

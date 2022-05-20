@@ -3,7 +3,11 @@ import {kUserContext} from "@waltz-controls/waltz-user-context-plugin";
 import {kChannelLog, kTopicLog} from "controllers/log";
 import Recipe from "models/recipe_model";
 import {kMainWindow} from "widgets/main_window";
-import {ExecuteRecipe, kControllerUserAction} from "@waltz-controls/waltz-user-actions-plugin";
+import {
+    kControllerUserAction,
+    ReadTangoAttribute,
+    WriteTangoAttribute
+} from "@waltz-controls/waltz-user-actions-plugin";
 
 import "views/recipe_view"
 
@@ -29,7 +33,6 @@ export default class RecipeWidget extends WaltzWidget {
             let promiseContext = this.app.getContext(kUserContext);
             switch(params.operation){
                 case "insert":
-                //console.log(params)
                 promiseContext = promiseContext
                         .then(userContext => userContext.updateExt(this.name, ext => ext.push(params.data)))
                     break;
@@ -129,11 +132,20 @@ export default class RecipeWidget extends WaltzWidget {
         this.dispatch(`Removing Recipe[${id}]`,kTopicLog, kChannelLog);
     }
 
-    async executeRecipe(recipe){
-        const user = (await this.app.getContext(kUserContext)).user;
+    async ExecuteRecipe(recipe){
 
-        return this.app.getController(kControllerUserAction)
-                            .submit(new ExecuteRecipe({user, recipe}));
+        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/boolean_scalar/value")
+        .then(function(data){
+
+            //response text
+console.log(data.text())
+            return(data.text())
+
+        },
+        function(data){
+            console.log('fail')
+            this.dispatch(`Could not read attribute[${data}]`,kTopicLog, kChannelLog)        
+        });
     }
 
 }

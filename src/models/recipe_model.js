@@ -9,25 +9,9 @@ export default class Recipe {
         this.meta = meta
         this.phases = phases
         this.switching = switching
-        this.func = RunRecipe
     }
 
     get name(){
         return this.id;
-    }
-
-
-
-
-    execute(context){
-        return this.func(context)
-            .then(result => {
-                this.result = "Recipe is Running";
-                return this;
-            })
-            .catch(err => {
-                this.errors.push(err);
-                throw this;
-            });
     }
 }

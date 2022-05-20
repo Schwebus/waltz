@@ -1,7 +1,7 @@
  import Recipe from "models/recipe_model";
 
  import {WaltzWidgetMixin} from "@waltz-controls/waltz-webix-extensions";
- 
+
 // class to globally keep track of number of phases currently displayed
 
 class no_phases {
@@ -122,16 +122,19 @@ const recipes_list = webix.protoUI({
      }
  },webix.ui.list);
 
+
+// output field for info about recipe execution
+
 const output = {
     view: 'fieldset',
-    label: 'Recipe output',
+    label: 'Fermentation State',
     body: {
         view: 'textarea',
+        height: 80,
         readonly: true,
         id: 'output'
     }
 };
- 
 
 // main view
 
@@ -251,23 +254,42 @@ const output = {
      /* function triggered by execute button
         --> calls tango api */
 
-     execute: function () {
+     execute: async function () {
+
          if(!this.isVisible() || this.$destructed) return;
  
          const recipe = this.save();
          if(recipe == null) return;
- 
-         this.config.root.executeRecipe(recipe)
-             .then(function (recipe) {
- 
-                 $$output.setValue(recipe.result);
-                 $$output.hideProgress();
-             })
-             .catch(function (recipe) {
 
-                $$output.setValue(recipe.errors);
-                 $$output.hideProgress();
-             });
+         var result;
+
+         const rest_host = 'localhost'
+        const rest_port = '8081'
+        const rest_version = 'v11'
+        const tango_host = 'tangobox'
+        const tango_port = '10000'
+
+
+        //execute_recipe(rest_host,rest_port,rest_version,tango_host,tango_port);
+
+
+        await webix.ajax().put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value?=" + recipe.phases["Phase 1"].temp)
+        .then(function(data){
+ 
+            result = data.text()
+
+            }
+
+         , function(data){
+
+            result = 'Could not start fermentation'
+
+         }
+
+         )
+
+         this.getTopParentView().$$('output').setValue(result)
+
      },
 
      /* function to create to views */
@@ -408,7 +430,16 @@ const output = {
                        
                         remove_button(current_no_phases)
 
-          ] } ] } } ] } },
+          ] } ] } },
+
+          {
+            view: 'resizer'
+
+            },
+            
+            output
+
+     ] } },
   
   $init:function(config){
 
