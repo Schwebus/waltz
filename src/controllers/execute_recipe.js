@@ -1,14 +1,15 @@
 const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,tango_host,tango_port){
-
+    console.log('exec started')
     phases = recipe.phases
     switching = recipe.switching
 
     no_phases = Object.keys(phases).length
 
     for (var i = 1; i <= no_phases; i++){
+        console.log('phase ' + i + " started")
 
         parameters = phases["Phase " + i]
-
+parameter = ['double_scalar', 'boolean_scalar']
         promises = []
 
         for (var j = 1; j <= Object.keys(parameters).length; j++){
@@ -17,17 +18,17 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
             + rest_port + "/tango/rest/" + rest_version + "/hosts/"
             + tango_host + ";" + tango_port + "=" + "/devices/" 
             //+ "bioreactor/parameters
-            + "sys/tg_test/1/attributes/"
-            + String(Object.keys(parameter)[j-1]).toLowerCase()
-            + "/value?=" + String(Object.values(parameter)[j-1])
+            + "sys/tg_test/1/attributes/" + parameter[j-1]
+            //+ String(Object.keys(parameter)[j-1]).toLowerCase()
+            + "/value?=" + i//String(Object.values(parameter)[j-1])
             )
 
             promises.push(eval('const ' + 'promise_' + j + ' = ' + post + ';'))
         
         }
-
+console.log('promises to get current parameter values' + promises)
         await Promise.all(promises)
-
+console.log('parameter setting promises done, testing if any return invalid quality or promise failure')
         .then(function(data){
 
                 for (var k = 0; Object.keys(data).length; k++){
@@ -75,8 +76,10 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
                         var finished = false
 
                         while (finished != true){
+                            
+                       // webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/parameters/weight/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
 
-                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/parameters/weight/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -108,9 +111,9 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
                         while (finished != true){
 
-                        webix.ajax().get(
-                            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
-                            devices/bioreactor/parameters/exito2/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
+                            //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
+                            //devices/bioreactor/parameters/exito2/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -142,9 +145,9 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
                         while (finished != true){
 
-                        webix.ajax().get(
-                            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
-                            devices/bioreactor/parameters/exitco2/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
+                            //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
+                            //devices/bioreactor/parameters/exitco2/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -188,7 +191,8 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
                         while (finished != true){
 
-                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/parameters/weight/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
+                        //("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/parameters/weight/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -220,9 +224,9 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
                         while (finished != true){
 
-                        webix.ajax().get(
-                            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
-                            devices/bioreactor/parameters/exito2/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
+                            //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
+                            //devices/bioreactor/parameters/exito2/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -254,9 +258,9 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
                         while (finished != true){
 
-                        webix.ajax().get(
-                            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
-                            devices/bioreactor/parameters/exitco2/attributes/value/value")
+                        webix.ajax().get("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value")
+                            //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
+                            //devices/bioreactor/parameters/exitco2/attributes/value/value")
                         .then(function(data){
  
                             if (
@@ -295,4 +299,5 @@ const execute_recipe = async function(recipe,rest_host,rest_port,rest_version,ta
 
 
     }
+    return {}
 }

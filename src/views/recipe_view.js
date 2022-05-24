@@ -131,6 +131,7 @@ const output = {
     body: {
         view: 'textarea',
         height: 80,
+        value: "Recipe 'Beer' RUNNING",
         readonly: true,
         id: 'output'
     }
@@ -149,6 +150,11 @@ const output = {
 
      new:function(current_no_phases){
 
+        webix.ajax().headers({
+            "Content-type":"application/json"}).put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/boolean_scalar/value?v=true")
+        //{"value":true})
+
+/*
         remove_views(current_no_phases, this)
         this.getTopParentView().$$("parameters_phase_1").setValues({
 
@@ -161,7 +167,7 @@ const output = {
             po2:        "",
             feed:       ""
 
-        })
+        })*/
 
 
         
@@ -254,16 +260,16 @@ const output = {
      /* function triggered by execute button
         --> calls tango api */
 
-     execute: async function () {
+     execute: function () {
 
          if(!this.isVisible() || this.$destructed) return;
  
          const recipe = this.save();
          if(recipe == null) return;
 
-         var result;
+        /* var result;
 
-         const rest_host = 'localhost'
+        const rest_host = 'localhost'
         const rest_port = '8081'
         const rest_version = 'v11'
         const tango_host = 'tangobox'
@@ -272,25 +278,80 @@ const output = {
 
         //execute_recipe(rest_host,rest_port,rest_version,tango_host,tango_port);
 
-
-        await webix.ajax().put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/double_scalar/value?=" + recipe.phases["Phase 1"].temp)
-        .then(function(data){
- 
-            result = data.text()
-
-            }
-
-         , function(data){
-
-            result = 'Could not start fermentation'
-
-         }
-
-         )
-
-         this.getTopParentView().$$('output').setValue(result)
-
+console.log('calling')
+this.config.root.ExecuteRecipe(recipe, rest_host, rest_port, rest_version, tango_host, tango_port).
+then(function(){
+console.log('finished')
      },
+     function(){
+         console.log('sth went wrong')
+     }
+        )*/
+
+
+
+var urlpara = btoa(
+JSON.stringify([{"name":"recipe","data":[{"name":"hi","type":"DevString","value":["hej"]}]}]))
+/*[
+    {
+      "host":"tangobox:10000",
+      "device":"sys/tg_test/1",
+      "name":"recipe",
+      "data":[
+           {
+             "name": "FirstDE",
+             "type" : "DevString",
+             "value": [
+               "The string"
+             ]
+           },
+           {
+             "name": "SecondDE",
+             "type" : "DevLong",
+             "value": [
+               666
+             ]
+           },
+           {
+             "name": "ThirdDE",
+             "type" : "DevShort",
+             "value": [
+               12
+             ]
+           }
+         ]
+       }
+     ]*/
+console.log(urlpara)
+        webix.ajax()
+        .headers({
+            "Content-type":"application/json"})
+            .put("http://localhost:8081/tango/rest/v11/hosts/tangobox/devices/sys/tg_test/1/pipes/generic_blob_rw/value",
+            JSON.stringify([{"name":"my_420","type":"DevString","value":["420420420420"]}])
+            )
+        //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
+        //devices/bioreactor/parameters/exito2/attributes/value/value")
+
+        //webix.ajax().put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/boolean_scalar/value",
+        //false)
+
+    .then(function(data){
+
+        if (
+            console.log(data.json())
+
+        ){
+        }
+        }
+
+     , function(data){
+
+        console.log(data.json())
+
+                }
+            )
+
+    },
 
      /* function to create to views */
 
@@ -396,23 +457,23 @@ const output = {
                       {cols:[
 
                         {rows:[
-                      { view:"text", id:"temp", label:"Temperature", name:"temp", maxWidth:200},
-                      { view:"text", id: "pressure", label:"Pressure", name:"pressure", maxWidth:200},
+                      { view:"text", id:"temp", label:"Temperature (°C)", name:"temp", maxWidth:200, labelWidth:150},
+                      { view:"text", id: "pressure", label:"Pressure (bar)", name:"pressure", maxWidth:200, labelWidth:150},
                   ]},
 
                         {rows:[
-                      { view:"text", label:"pH", name:"pH", maxWidth:200},
-                      { view:"text", label:"Air Flow", name:"flow", maxWidth:200}
+                      { view:"text", label:"pH", name:"pH", maxWidth:200, labelWidth:150},
+                      { view:"text", label:"Air Flow (L/min)", name:"flow", maxWidth:200, labelWidth:150}
                   ]},
                       
                         {rows:[
-                      { view:"text", label:"Anti-Foam", name:"af", maxWidth:200},
-                      { view:"text", label:"Stirrer", name:"stirrer", maxWidth:200}
+                      { view:"text", label:"Anti-Foam", name:"af", maxWidth:200, labelWidth:150},
+                      { view:"text", label:"Stirrer (/min)", name:"stirrer", maxWidth:200, labelWidth:150}
                   ]},
 
                         {rows:[
-                      { view:"text",label:"pO2", name:"po2", maxWidth:200},
-                      { view:"text", label:"Feed", name:"feed", maxWidth:200}
+                      { view:"text",label:"pO2 (%)", name:"po2", maxWidth:200, labelWidth:150},
+                      { view:"text", label:"Feed (%)", name:"feed", maxWidth:200, labelWidth:150}
                   ]}
                      ]}
                   ],
@@ -628,19 +689,19 @@ const switching_view = function(switching, switching_no){
               { view:"text", label:"Time (min)", name:"time", 
                 value: (switching["Switching " + switching_no]["Logic"] != "or") ? "" :  
                 switching["Switching " + switching_no]["Values"].time,
-                maxWidth:200},
-              { view:"text", label:"Weight", name:"weight",
+                maxWidth:200, labelWidth:150},
+              { view:"text", label:"Weight (kg)", name:"weight",
                 value: (switching["Switching " + switching_no]["Logic"] != "or") ? "" :  
                 switching["Switching " + switching_no]["Values"].weight,
-                maxWidth:200},
-              { view:"text", label:"Exit O2", name:"exito2",
+                maxWidth:200, labelWidth:150},
+              { view:"text", label:"Exit O2 (%)", name:"exito2",
                 value: (switching["Switching " + switching_no]["Logic"] != "or") ? "" :  
                 switching["Switching " + switching_no]["Values"].exito2,
-                maxWidth:200},
-              { view:"text", label:"Exit CO2", name:"exitco2", 
+                maxWidth:200, labelWidth:150},
+              { view:"text", label:"Exit CO2 (%)", name:"exitco2", 
                 value: (switching["Switching " + switching_no]["Logic"] != "or") ? "" :  
                 switching["Switching " + switching_no]["Values"].exitco2,
-                maxWidth:200},
+                maxWidth:200, labelWidth:150},
                ] },
 
                {view: "spacer"},
@@ -683,19 +744,19 @@ const switching_view = function(switching, switching_no){
                   { view:"text", label:"Time (min)", name:"time", 
                     value: (switching["Switching " + switching_no]["Logic"] != "and") ? "" :  
                     switching["Switching " + switching_no]["Values"].time,
-                    maxWidth:200},
-                  { view:"text", label:"Weight", name:"weight",
+                    maxWidth:200, labelWidth:150},
+                  { view:"text", label:"Weight (kg)", name:"weight",
                     value: (switching["Switching " + switching_no]["Logic"] != "and") ? "" :  
                     switching["Switching " + switching_no]["Values"].weight,
-                    maxWidth:200},
-                  { view:"text", label:"Exit O2", name:"exito2",
+                    maxWidth:200, labelWidth:150},
+                  { view:"text", label:"Exit O2 (%)", name:"exito2",
                     value: (switching["Switching " + switching_no]["Logic"] != "and") ? "" :  
                     switching["Switching " + switching_no]["Values"].exito2,
-                    maxWidth:200},
-                  { view:"text", label:"Exit CO2", name:"exitco2", 
+                    maxWidth:200, labelWidth:150},
+                  { view:"text", label:"Exit CO2 (%)", name:"exitco2", 
                     value: (switching["Switching " + switching_no]["Logic"] != "and") ? "" :  
                     switching["Switching " + switching_no]["Values"].exitco2,
-                    maxWidth:200},
+                    maxWidth:200, labelWidth:150},
                    ] },
     
                    {view: "spacer"},
@@ -758,27 +819,27 @@ const phase_view = function(phases, phase_no){
                     elements:[
                         {cols:[
                             {rows:[
-        { view:"text", label:"Temperature", name:"temp", maxWidth:200, 
+        { view:"text", label:"Temperature (°C)", name:"temp", maxWidth:200, labelWidth:150, 
         value:phases["Phase " + phase_no].temp},
-        { view:"text", label:"Pressure", name:"pressure", maxWidth:200,
+        { view:"text", label:"Pressure (bar)", name:"pressure", maxWidth:200, labelWidth:150,
         value:phases["Phase " + phase_no].pressure},
  ]},
                             {rows:[
-        { view:"text", label:"pH", name:"pH", maxWidth:200,
+        { view:"text", label:"pH", name:"pH", maxWidth:200, labelWidth:150,
         value:phases["Phase " + phase_no].pH},
-        { view:"text", label:"Air Flow", name:"flow", maxWidth:200,
+        { view:"text", label:"Air Flow (L/min)", name:"flow", maxWidth:200, labelWidth:150,
         value:phases["Phase " + phase_no].flow}
  ]},
                             {rows:[
-     { view:"text", label:"Anti-Foam", name:"af", maxWidth:200,
+     { view:"text", label:"Anti-Foam", name:"af", maxWidth:200, labelWidth:150,
      value:phases["Phase " + phase_no].af},
-     { view:"text", label:"Stirrer", name:"stirrer", maxWidth:200,
+     { view:"text", label:"Stirrer (/min)", name:"stirrer", maxWidth:200, labelWidth:150,
      value:phases["Phase " + phase_no].stirrer}
  ]},
                             {rows:[
-     { view:"text", label:"pO2", name:"po2", maxWidth:200,
+     { view:"text", label:"pO2 (%)", name:"po2", maxWidth:200, labelWidth:150,
      value:phases["Phase " + phase_no].po2},
-     { view:"text", label:"Feed", name:"feed", maxWidth:200,
+     { view:"text", label:"Feed (%)", name:"feed", maxWidth:200, labelWidth:150,
      value:phases["Phase " + phase_no].feed}
  ]}
     ]}
