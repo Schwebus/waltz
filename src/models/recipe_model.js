@@ -1,8 +1,3 @@
-const RunRecipe = function(context){
-    console.log(context)
-}
-
-
 export default class Recipe {
     constructor({id, meta,phases,switching}) {
         this.id = id;

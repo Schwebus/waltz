@@ -231,7 +231,6 @@ export default class RecipeWidget extends WaltzWidget {
              // test because one less switching
 
              if (i < no_phases){
-    console.log('probably not in here')
                 if (switching["Switching " + i]["Logic"] == "or"){
 
                     var promise_time;

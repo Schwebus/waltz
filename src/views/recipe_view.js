@@ -23,6 +23,11 @@ class no_phases {
 }
 
 
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+   }
+
+
 var current_no_phases = new no_phases(1);
 
 
@@ -91,6 +96,15 @@ const upper_toolbar = function (current_no_phases){
          },
          {
             view: "icon",
+            icon: 'mdi mdi-stop',
+            click: function () {
+                this.getTopParentView().stop();
+            },
+            hotkey: 'ctrl+enter',
+            tooltip: 'Hotkey: ctrl+enter'
+        },
+         {
+            view: "icon",
             icon: 'wxi-plus',
             click: function () {
                 this.getTopParentView().new(current_no_phases);
@@ -129,11 +143,61 @@ const output = {
     view: 'fieldset',
     label: 'Fermentation State',
     body: {
-        view: 'textarea',
-        height: 80,
-        value: "Recipe 'Beer' RUNNING",
-        readonly: true,
-        id: 'output'
+        cols:[
+        {
+            view:"icon",
+            icon:"wxi-sync",
+            click(){
+                webix.ajax().get(
+                    "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                        function(data){
+                            webix.ui.views["$textarea2"].setValue(data.json().value)
+                        },
+                        function(){
+
+                            webix.ui.views["$textarea2"].setValue("No recipe being currently executed")
+                        }
+                    )
+
+            }
+        },
+
+        {
+            view: 'textarea',
+            height: 80,
+            value: "Init...",
+            readonly: true,
+            id: 'output',
+            on: {
+                onBindApply: async function () {
+                    while (true){
+                    webix.ajax().get(
+                        "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                            function(data){
+                                webix.ui.views["$textarea2"].setValue(data.json().value)
+                            },
+                            function(){
+
+                                webix.ui.views["$textarea2"].setValue("No recipe being currently executed")
+                            }
+                        )
+
+                    await sleep(10000)
+                        }
+
+                },
+
+                /*
+                  * Event listener. Work-around [object Object] in this field.
+                  */
+
+                onBindRequest:function(){
+                    webix.ui.views["$textarea2"].setValue("Init...")
+                }
+            }
+        }
+    ]
+
     }
 };
 
@@ -150,11 +214,7 @@ const output = {
 
      new:function(current_no_phases){
 
-        webix.ajax().headers({
-            "Content-type":"application/json"}).put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/boolean_scalar/value?v=true")
-        //{"value":true})
 
-/*
         remove_views(current_no_phases, this)
         this.getTopParentView().$$("parameters_phase_1").setValues({
 
@@ -167,7 +227,11 @@ const output = {
             po2:        "",
             feed:       ""
 
-        })*/
+        })
+        
+        this.getTopParentView().$$("acc").addView(
+            switching_view({}, 1, true)
+        )
 
 
         
@@ -192,16 +256,16 @@ const output = {
 
          var current_no_phases = Math.floor(this.getTopParentView().$$("acc")._cells.length / 2) + 1
 
-         var phases = {"Phase 1" : this.getTopParentView().$$("parameters_phase_1").getValues()}
+         //var phases = {"Phase 1" : this.getTopParentView().$$("parameters_phase_1").getValues()}
 
          var switching = {}
 
-         for (var i=2; i<=current_no_phases; i++){
+         for (var i=1; i<=current_no_phases; i++){
 
             var which_switching = this.getTopParentView().$$("acc").getChildViews()[i+(i-3)].getChildViews()[0].getTabbar().getValue()
 
 
-            switching["Switching " + (i-1)] = { 
+            switching["Switching " + (i)] = { 
                 
                                             "Logic": which_switching.slice(0,(which_switching.length - 2)),
 
@@ -209,19 +273,19 @@ const output = {
                                                 
                                                 time: (which_switching.slice(0,(which_switching.length - 2)) == 'custom') ? 
                                                     "" : this.getTopParentView().$$(
-                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_time_" + (i-1))
+                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_time_" + (i))
                                                     .getValue(),
                                                 weight: (which_switching.slice(0,(which_switching.length - 2)) == 'custom') ? 
                                                     "" : this.getTopParentView().$$(
-                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_weight_" + (i-1))
+                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_weight_" + (i))
                                                     .getValue(),
                                                 exito2: (which_switching.slice(0,(which_switching.length - 2)) == 'custom') ? 
                                                     "" : this.getTopParentView().$$(
-                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_exito2_" + (i-1))
+                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_exito2_" + (i))
                                                     .getValue(),
                                                 exitco2: (which_switching.slice(0,(which_switching.length - 2)) == 'custom') ? 
                                                     "" : this.getTopParentView().$$(
-                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_exitco2_" + (i-1))
+                                                    which_switching.slice(0,(which_switching.length - 2)) + "_check_exitco2_" + (i))
                                                     .getValue()
                 
                                             },
@@ -241,7 +305,7 @@ const output = {
 
          const id = this.$$('recipe_name').getValue().trim()
 
-         const recipe = new Recipe({id, meta, phases , switching})
+         const recipe = new Recipe({id, meta, phases, switching})
 
          return this.config.root.saveRecipe(recipe)
      },
@@ -257,6 +321,46 @@ const output = {
          this.config.root.removeRecipe(id);
      },
 
+     stop:function(){
+
+        if(!this.isVisible() || this.$destructed) return;
+ 
+        const recipe = this.save();
+        if(recipe == null) return;
+
+       const rest_host = 'localhost'
+       const rest_port = '8081'
+       const rest_version = 'v11'
+       const tango_host = 'tangobox'
+       const tango_port = '10000'
+
+       webix.ajax()
+       .headers({
+           "Content-type":"application/json"})
+           .put(
+
+           "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
+            
+           {"host":"tangobox:10000","device":"bioreactor/processes/recipe","name":"Stop"}
+           
+           )
+
+   .then(function(data){
+
+           console.log(data.json())
+
+       }
+
+    , function(data){
+
+       console.log(data.json())
+
+               }
+           )
+        
+        },
+
+
      /* function triggered by execute button
         --> calls tango api */
 
@@ -267,81 +371,43 @@ const output = {
          const recipe = this.save();
          if(recipe == null) return;
 
-        /* var result;
-
         const rest_host = 'localhost'
         const rest_port = '8081'
         const rest_version = 'v11'
         const tango_host = 'tangobox'
         const tango_port = '10000'
 
-
-        //execute_recipe(rest_host,rest_port,rest_version,tango_host,tango_port);
-
-console.log('calling')
-this.config.root.ExecuteRecipe(recipe, rest_host, rest_port, rest_version, tango_host, tango_port).
-then(function(){
-console.log('finished')
-     },
-     function(){
-         console.log('sth went wrong')
-     }
-        )*/
-
-
-
-var urlpara = btoa(
-JSON.stringify([{"name":"recipe","data":[{"name":"hi","type":"DevString","value":["hej"]}]}]))
-/*[
-    {
-      "host":"tangobox:10000",
-      "device":"sys/tg_test/1",
-      "name":"recipe",
-      "data":[
-           {
-             "name": "FirstDE",
-             "type" : "DevString",
-             "value": [
-               "The string"
-             ]
-           },
-           {
-             "name": "SecondDE",
-             "type" : "DevLong",
-             "value": [
-               666
-             ]
-           },
-           {
-             "name": "ThirdDE",
-             "type" : "DevShort",
-             "value": [
-               12
-             ]
-           }
-         ]
-       }
-     ]*/
-console.log(urlpara)
         webix.ajax()
         .headers({
             "Content-type":"application/json"})
-            .put("http://localhost:8081/tango/rest/v11/hosts/tangobox/devices/sys/tg_test/1/pipes/generic_blob_rw/value",
-            JSON.stringify([{"name":"my_420","type":"DevString","value":["420420420420"]}])
-            )
-        //"http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/\
-        //devices/bioreactor/parameters/exito2/attributes/value/value")
+            .put(/*("http://"
+            + rest_host
+            +":"
+            + rest_port
+            + "/tango/rest/"
+            + rest_version
+            + "/hosts/"
+            + tango_host + ";port="
+            + tango_port
 
-        //webix.ajax().put("http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/sys/tg_test/1/attributes/boolean_scalar/value",
-        //false)
+            + "/devices/bioreactor/processes/recipe/commands/Start",*/
+
+            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
+            
+                
+            {"host":"tangobox:10000","device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
+            
+            /*+ "/devices/bioreactor/processes/recipe/pipes/current_recipe/value",
+            JSON.stringify(
+            [
+                {"name":"my_420_aktuell_kulrut","type":"DevString","value":[JSON.stringify(recipe)]}
+          ])*/
+            )
 
     .then(function(data){
 
-        if (
             console.log(data.json())
 
-        ){
-        }
         }
 
      , function(data){
@@ -399,7 +465,7 @@ console.log(urlpara)
 
                             var phases = recipe.phases
 
-                            this.setValues(phases["Phase 1"]);
+                            //this.setValues(phases["Phase 1"]);
 
                             var no_phases_loaded_recipe = Object.keys(phases).length
                    
@@ -418,7 +484,7 @@ console.log(urlpara)
 
                             // adding new views
 
-                            for (var i=2; i<=current_no_phases.get; i++){
+                            for (var i=1; i<=current_no_phases.get; i++){
 
                                //var which_switching = this.getTopParentView().$$("switching_" + i).getTabbar().getValue()
 
@@ -426,20 +492,33 @@ console.log(urlpara)
 
                               this.getTopParentView().$$("acc").addView(
 
-                                switching_view(switching, i-1)
+                                phase_view(phases, i)
 
                               )
 
+                              var end_conditions;
+
+                              if (i != current_no_phases){
+
+                                end_conditions = false
+
+                              }
+
+                              else{
+
+                                end_conditions = true
+
+                              }
                               this.getTopParentView().$$("acc").addView(
 
-                                phase_view(phases, i)
+                                switching_view(switching, i, end_conditions)
 
                               )
                             
                               // select correct tab
 
-                            this.getTopParentView().$$("tabbar_switching_" + (i-1)).setValue(
-                                switching["Switching " + (i-1)]["Logic"] + "_" + (i-1))
+                            this.getTopParentView().$$("tabbar_switching_" + (i)).setValue(
+                                switching["Switching " + (i)]["Logic"] + "_" + (i))
                         
                             }
                                                              
@@ -462,7 +541,7 @@ console.log(urlpara)
                   ]},
 
                         {rows:[
-                      { view:"text", label:"pH", name:"pH", maxWidth:200, labelWidth:150},
+                      { view:"text", label:"pH", name:"ph", maxWidth:200, labelWidth:150},
                       { view:"text", label:"Air Flow (L/min)", name:"flow", maxWidth:200, labelWidth:150}
                   ]},
                       
@@ -477,11 +556,13 @@ console.log(urlpara)
                   ]}
                      ]}
                   ],
+
                      elementsConfig:{padding: 10}
                      }
-                     }
-
-             ]}
+                     },
+                     switching_view({}, 1, true)
+             ]
+            }
             
              ,
 
@@ -514,7 +595,8 @@ console.log(urlpara)
 
         this.$$('recipe_name').bind(config.root.data);
 
-        //webix.extend(this.$$('output'), webix.ProgressBar);
+        this.$$('output').bind(config.root.data);
+
           webix.message("Recipe has been initialized!")
       })
   }
@@ -532,13 +614,15 @@ const add_button = function(current_no_phases){
         value:"Add Phase",                        
         click:function(id){
 
+            this.getTopParentView().$$("acc").getChildViews()
+            [(this.getTopParentView().$$("acc").getChildViews().length) - 1]
+            .define('header','Switching Conditions')
+
+            this.getTopParentView().$$("acc").getChildViews()
+            [(this.getTopParentView().$$("acc").getChildViews().length) - 1]
+            .refresh()
+
             // add phase and switching conditions
-
-            $$(id).getTopParentView().$$("acc").addView(
-
-                switching_view({},current_no_phases.get)
-
-                        )
 
             $$(id).getTopParentView().$$("acc").addView(
 
@@ -546,9 +630,16 @@ const add_button = function(current_no_phases){
 
                         )
 
+            $$(id).getTopParentView().$$("acc").addView(
+
+                switching_view({},current_no_phases.get + 1, true)
+
+                                    )
+            
             // update current number of phases
 
             current_no_phases.set = current_no_phases.get + 1;
+
                         }
                     }
 }
@@ -565,6 +656,14 @@ const remove_button = function(current_no_phases){
         // remove last phase + switching conditions
 
                 remove_phase(current_no_phases, this)
+
+                this.getTopParentView().$$("acc").getChildViews()
+            [(this.getTopParentView().$$("acc").getChildViews().length) - 1]
+            .define('header','Ending Conditions')
+
+            this.getTopParentView().$$("acc").getChildViews()
+            [(this.getTopParentView().$$("acc").getChildViews().length) - 1]
+            .refresh()
 
            }
            
@@ -604,11 +703,34 @@ const remove_views = function(current_no_phases,obj){
         remove_phase(current_no_phases, obj)
     
     }
+
+    /* remove last switching panel as it is added 
+    when clicking new button after this function
+    (remove_views) is called */
+
+    obj.getTopParentView().$$("acc").removeView(
+    obj.getTopParentView().$$("acc").getChildViews()
+    [(obj.getTopParentView().$$("acc").getChildViews().length) - 1]) 
+
 }
 
 // function to create new or load switching view
 
-const switching_view = function(switching, switching_no){
+const switching_view = function(switching, switching_no, end_conditions = false){
+
+    var header_name;
+
+    if (end_conditions){
+
+        header_name = "Ending Conditions"
+
+    }
+
+    else{
+
+        header_name = "Switching Conditions"
+
+    }
 
     if(Object.keys(switching) == 0){
 
@@ -650,7 +772,7 @@ const switching_view = function(switching, switching_no){
     return {
     view:"accordionitem",
     id:"acc_item_switching_" + switching_no,
-     header:"Switching Conditions",
+     header: header_name,
      body:
      {
          view: "tabview",
@@ -767,7 +889,7 @@ const switching_view = function(switching, switching_no){
           ],
           elementsConfig:{padding: 10}
              }
-           },
+           }/*,
            {
              header: "Custom",
              body: {
@@ -775,7 +897,7 @@ const switching_view = function(switching, switching_no){
                id: "custom_" + switching_no,
                template:"Custom Logic"
              }
-           }
+           }*/
          ]}
         }
     }
@@ -825,7 +947,7 @@ const phase_view = function(phases, phase_no){
         value:phases["Phase " + phase_no].pressure},
  ]},
                             {rows:[
-        { view:"text", label:"pH", name:"pH", maxWidth:200, labelWidth:150,
+        { view:"text", label:"pH", name:"ph", maxWidth:200, labelWidth:150,
         value:phases["Phase " + phase_no].pH},
         { view:"text", label:"Air Flow (L/min)", name:"flow", maxWidth:200, labelWidth:150,
         value:phases["Phase " + phase_no].flow}
