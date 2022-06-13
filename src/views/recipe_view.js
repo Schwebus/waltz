@@ -151,11 +151,11 @@ const output = {
                 webix.ajax().get(
                     "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
                         function(data){
-                            webix.ui.views["$textarea2"].setValue(data.json().value)
+                            webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                         },
                         function(){
 
-                            webix.ui.views["$textarea2"].setValue("No recipe being currently executed")
+                            webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue("No recipe being currently executed")
                         }
                     )
 
@@ -174,11 +174,10 @@ const output = {
                     webix.ajax().get(
                         "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
                             function(data){
-                                webix.ui.views["$textarea2"].setValue(data.json().value)
+                                webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                             },
                             function(){
-
-                                webix.ui.views["$textarea2"].setValue("No recipe being currently executed")
+                                webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue("No recipe being currently executed")
                             }
                         )
 
@@ -192,7 +191,7 @@ const output = {
                   */
 
                 onBindRequest:function(){
-                    webix.ui.views["$textarea2"].setValue("Init...")
+                    webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue("Init...")
                 }
             }
         }
