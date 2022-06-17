@@ -248,21 +248,15 @@ const output = {
         if(!this.isVisible() || this.$destructed) return;
  
          if(!this.$$('recipe_name').validate()) return;
- 
-        /* this returns the number of phases (since first acc = 1 and each added phase is one acc
-         consisting of two sub-accs which still count as one in this method)
-        */
 
-         var current_no_phases = Math.floor(this.getTopParentView().$$("acc")._cells.length / 2) + 1
+         var current_no_phases = this.getTopParentView().$$("acc")._cells.length / 2
 
-         //var phases = {"Phase 1" : this.getTopParentView().$$("parameters_phase_1").getValues()}
+         var phases = {}
 
          var switching = {}
 
          for (var i=1; i<=current_no_phases; i++){
-
-            var which_switching = this.getTopParentView().$$("acc").getChildViews()[i+(i-3)].getChildViews()[0].getTabbar().getValue()
-
+            var which_switching = this.getTopParentView().$$("acc").getChildViews()[i*2-1].getChildViews()[0].getTabbar().getValue()
 
             switching["Switching " + (i)] = { 
                 
@@ -379,28 +373,14 @@ const output = {
         webix.ajax()
         .headers({
             "Content-type":"application/json"})
-            .put(/*("http://"
-            + rest_host
-            +":"
-            + rest_port
-            + "/tango/rest/"
-            + rest_version
-            + "/hosts/"
-            + tango_host + ";port="
-            + tango_port
-
-            + "/devices/bioreactor/processes/recipe/commands/Start",*/
+            .put(
 
             "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
             
                 
             {"host":"tangobox:10000","device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
             
-            /*+ "/devices/bioreactor/processes/recipe/pipes/current_recipe/value",
-            JSON.stringify(
-            [
-                {"name":"my_420_aktuell_kulrut","type":"DevString","value":[JSON.stringify(recipe)]}
-          ])*/
+            
             )
 
     .then(function(data){
@@ -464,18 +444,16 @@ const output = {
 
                             var phases = recipe.phases
 
-                            //this.setValues(phases["Phase 1"]);
+                            this.setValues(phases["Phase 1"]);
 
                             var no_phases_loaded_recipe = Object.keys(phases).length
-                   
-                            var no_switching_loaded_recipe = no_phases_loaded_recipe - 1
-                   
+                                      
                             var switching = recipe.switching
 
                             /*  removing currently displayed views other than first one
                                 which has already been set according to loaded recipe   */
 
-                            remove_views(current_no_phases,this);
+                                remove_views(current_no_phases,this);
 
                             // set current_no_phases (next phase to be added) correctly
 
@@ -485,26 +463,24 @@ const output = {
 
                             for (var i=1; i<=current_no_phases.get; i++){
 
-                               //var which_switching = this.getTopParentView().$$("switching_" + i).getTabbar().getValue()
-
-                              // switching["Switching " + i] = this.getTopParentView().$$(which_switching).getValues()
-
-                              this.getTopParentView().$$("acc").addView(
+                                if (i != 1){
+                              
+                                this.getTopParentView().$$("acc").addView(
 
                                 phase_view(phases, i)
 
                               )
+                                }
 
                               var end_conditions;
 
-                              if (i != current_no_phases){
+                              if (i != current_no_phases.get){
 
                                 end_conditions = false
 
                               }
 
                               else{
-
                                 end_conditions = true
 
                               }
