@@ -4,7 +4,7 @@ ARG NODE_AUTH_TOKEN
 
 ARG USER_CONTEXT_VER=0.5
 
-ARG TANGO_REST_VER=2.2
+ARG TANGO_REST_VER=2.3
 
 RUN echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
 
@@ -13,6 +13,8 @@ RUN apk add --no-cache wget unzip
 COPY . /src
 
 WORKDIR /src
+
+RUN npm install @waltz-controls/waltz-user-context-plugin --registry=https://npm.pkg.github.com/waltz-controls
 
 RUN npm install
 

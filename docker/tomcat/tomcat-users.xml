@@ -43,6 +43,6 @@
 -->
   <role rolename="mtango-rest"/>
   <role rolename="mtango-groovy"/>
-  <user username="ingvord" password="test" roles="mtango-rest,mtango-groovy,desy-user"/>
+  <user username="karl" password="tango" roles="mtango-rest,mtango-groovy,desy-user"/>
   <user username="tango-cs" password="tango" roles="mtango-rest"/>
 </tomcat-users>
