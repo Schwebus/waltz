@@ -149,7 +149,7 @@ const output = {
             icon:"wxi-sync",
             click(){
                 webix.ajax().get(
-                    "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                    "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
                         function(data){
                             webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                         },
@@ -172,7 +172,7 @@ const output = {
                 onBindApply: async function () {
                     while (true){
                     webix.ajax().get(
-                        "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                        "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
                             function(data){
                                 webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                             },
@@ -332,9 +332,9 @@ const output = {
            "Content-type":"application/json"})
            .put(
 
-           "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
+           "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
             
-           {"host":"tangobox:10000","device":"bioreactor/processes/recipe","name":"Stop"}
+           {"host":"databaseds:10000","device":"bioreactor/processes/recipe","name":"Stop"}
            
            )
 
@@ -375,10 +375,10 @@ const output = {
             "Content-type":"application/json"})
             .put(
 
-            "http://localhost:8081/tango/rest/v11/hosts/tangobox;port=10000/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
+            "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
             
                 
-            {"host":"tangobox:10000","device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
+            {"host":"databaseds:10000","device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
             
             
             )

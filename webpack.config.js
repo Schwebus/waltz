@@ -80,7 +80,7 @@ new webpack.DefinePlugin({
                 REST_API_HOST : `"localhost"`,
                 REST_API_PORT : `8080`,
                 REST_API_VERSION : `"v11"`,
-                TANGO_HOST : `"tangobox"`,
+                TANGO_HOST : `"databaseds"`,
                 TANGO_PORT : `10000`,
                 USER_CONTEXT_URL : `"/user-context/cache"`
             })
