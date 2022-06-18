@@ -322,9 +322,9 @@ const output = {
         if(recipe == null) return;
 
        const rest_host = 'localhost'
-       const rest_port = '8081'
+       const rest_port = '8080'
        const rest_version = 'v11'
-       const tango_host = 'tangobox'
+       const tango_host = 'databaseds'
        const tango_port = '10000'
 
        webix.ajax()
@@ -332,9 +332,9 @@ const output = {
            "Content-type":"application/json"})
            .put(
 
-           "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
+           "http://"+rest_host+":"+rest_port+"/tango/rest/"+rest_version+"/hosts/"+tango_host+";port="+tango_port+"/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
             
-           {"host":"databaseds:10000","device":"bioreactor/processes/recipe","name":"Stop"}
+           {"host":tango_host":"+tango_port,"device":"bioreactor/processes/recipe","name":"Stop"}
            
            )
 
@@ -364,22 +364,20 @@ const output = {
          const recipe = this.save();
          if(recipe == null) return;
 
-        const rest_host = 'localhost'
-        const rest_port = '8081'
-        const rest_version = 'v11'
-        const tango_host = 'tangobox'
-        const tango_port = '10000'
+       const rest_host = 'localhost'
+       const rest_port = '8080'
+       const rest_version = 'v11'
+       const tango_host = 'databaseds'
+       const tango_port = '10000'
 
-        webix.ajax()
-        .headers({
-            "Content-type":"application/json"})
-            .put(
+       webix.ajax()
+       .headers({
+           "Content-type":"application/json"})
+           .put(
 
-            "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
+           "http://"+rest_host+":"+rest_port+"/tango/rest/"+rest_version+"/hosts/"+tango_host+";port="+tango_port+"/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
             
-                
-            {"host":"databaseds:10000","device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
-            
+           {"host":tango_host":"+tango_port,"device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
             
             )
 
