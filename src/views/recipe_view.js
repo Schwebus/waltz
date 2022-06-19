@@ -334,7 +334,7 @@ const output = {
 
            "http://"+rest_host+":"+rest_port+"/tango/rest/"+rest_version+"/hosts/"+tango_host+";port="+tango_port+"/devices/bioreactor/processes/recipe/commands/Stop?filter=!input",
             
-           {"host":tango_host":"+tango_port,"device":"bioreactor/processes/recipe","name":"Stop"}
+           {"host":tango_host+":"+tango_port,"device":"bioreactor/processes/recipe","name":"Stop"}
            
            )
 
@@ -370,6 +370,8 @@ const output = {
        const tango_host = 'databaseds'
        const tango_port = '10000'
 
+	webix.alert("Please follow instructions on fermenter screen")
+
        webix.ajax()
        .headers({
            "Content-type":"application/json"})
@@ -377,7 +379,7 @@ const output = {
 
            "http://"+rest_host+":"+rest_port+"/tango/rest/"+rest_version+"/hosts/"+tango_host+";port="+tango_port+"/devices/bioreactor/processes/recipe/commands/Start?filter=!input",
             
-           {"host":tango_host":"+tango_port,"device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
+           {"host":tango_host+":"+tango_port,"device":"bioreactor/processes/recipe","name":"Start","input":JSON.stringify(recipe)}
             
             )
 
