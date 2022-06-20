@@ -39,4 +39,3 @@ COPY --from=BUILD /src/user-context.war /usr/local/tomcat/webapps
 COPY --from=BUILD /src/tango.war /usr/local/tomcat/webapps
 
 COPY docker/tomcat/tomcat-users.xml docker/tomcat/server.xml /usr/local/tomcat/conf/
-
