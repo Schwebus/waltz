@@ -149,7 +149,7 @@ const output = {
             icon:"wxi-sync",
             click(){
                 webix.ajax().get(
-                    "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                    "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/cur_value").then(
                         function(data){
                             webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                         },
@@ -172,7 +172,7 @@ const output = {
                 onBindApply: async function () {
                     while (true){
                     webix.ajax().get(
-                        "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/value").then(
+                        "http://localhost:8080/tango/rest/v11/hosts/databaseds;port=10000/devices/bioreactor/processes/recipe/attributes/cur_status/cur_value").then(
                             function(data){
                                 webix.ui.views["$accordion1"].getTopParentView().$$('output').setValue(data.json().value)
                             },
