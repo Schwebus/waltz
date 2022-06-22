@@ -1,5 +1,7 @@
 FROM node:12-alpine as BUILD
 
+ARG TOKEN=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
+
 ARG USER_CONTEXT_VER=0.5
 
 ARG TANGO_REST_VER=2.3
@@ -9,6 +11,8 @@ RUN apk add --no-cache wget unzip
 COPY . /src
 
 WORKDIR /src
+
+RUN echo //npm.pkg.github.com/:_authToken=$TOKEN >> .npmrc
 
 RUN npm install @waltz-controls/waltz-user-context-plugin --registry=https://npm.pkg.github.com/waltz-controls
 
