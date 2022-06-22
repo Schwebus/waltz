@@ -1,12 +1,8 @@
 FROM node:12-alpine as BUILD
 
-ARG NODE_AUTH_TOKEN
-
 ARG USER_CONTEXT_VER=0.5
 
 ARG TANGO_REST_VER=2.3
-
-RUN echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
 
 RUN apk add --no-cache wget unzip
 
