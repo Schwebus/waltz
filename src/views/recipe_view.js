@@ -413,6 +413,7 @@ const output = {
               // scrollview as main container
 
               { view: 'scrollview',     
+                width : 1200,
                   body:{
                       rows:[
 
