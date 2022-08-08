@@ -528,7 +528,7 @@ const output = {
                         {rows:[
                       { view:"text",label:"pO2 (%)", name:"po2", maxWidth:200, labelWidth:150},
                       { view:"text", label:"Feed (%)", name:"feed", maxWidth:200, labelWidth:150}
-                  ]}
+                  ]}, {}
                      ]}
                   ],
 
